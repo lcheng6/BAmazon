@@ -1,1 +1,4 @@
 video script notes for self: 
+
+1. use the bamazonCustomer to show the inventory, 
+2. Do a large purchase and show a Insufficient quantity 
