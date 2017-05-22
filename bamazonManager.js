@@ -30,12 +30,13 @@ function askQuestions(params) {
         message: 'Manager menu options:',
         choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', "** Exit **"]
     }]).then((action) => {
-      if (!commands[action.input] === undefined) {
-        commands[action.input]();
-      }
+      // if (!commands[action.input] === undefined) {
+      //   commands[action.input]();
+      // }
+      var command = commands[action.input]
+      command();
     });
 };
-
 
 function printAllData(queryString, myItemProcesser) {
 
@@ -48,9 +49,9 @@ function printAllData(queryString, myItemProcesser) {
             }
             else {
                 items.forEach((data) => {
-                    myItemProcesser.addItem(data);
-                    
+                    myItemProcesser.addItem(data); 
                 });
+                console.log("");
                 console.log(myItemProcesser.table.toString())
             }
         });
@@ -68,8 +69,10 @@ function itemProcesser (table, itemProcFunc) {
     this.table.push(elem);
   }
 }
+
 //this function should list every available items: item IDS, names, prices and quantities
 function viewProductsForSale() {
+  console.log("within viewProductsForSale")
   var connection_string = "SELECT item_id, product_name, price, stock_quantity from products";
   var table = new Table({head: ["Id", "Name", "Price", "Stock Quantity"]});
   var itemTablePrinter = new itemProcesser(table, function(data) {
@@ -79,16 +82,50 @@ function viewProductsForSale() {
   });
 
   printAllData(connection_string, itemTablePrinter);
+  askQuestions();
 
 }
 
-function viewLowInventory() {}
-function addToInventory() {}
+//this function should list every available items: item IDS, names, prices and quantities for items whose quantity is lower than 5
+function viewLowInventory() {
+  var connection_string = "SELECT item_id, product_name, price, stock_quantity from products where stock_quantity < 5 ";
+  var table = new Table({head: ["Id", "Name", "Price", "Stock Quantity"]});
+  var itemTablePrinter = new itemProcesser(table, function(data) {
+    var elem = [];
+    elem.push(data.item_id, data.product_name, data.price, data.stock_quantity);
+    return elem;
+  });
+
+  printAllData(connection_string, itemTablePrinter);
+  askQuestions();
+
+} 
+
+function addToInventory() {
+
+  inquirer.prompt([{
+            type: 'input',
+            name: 'id',
+            message: 'Enter item ID:',
+        }, {
+            type: "input",
+            name: "amount",
+            message: "How many items you want to add?"
+        }]).then((action) => {
+            //update product quantity based on id
+            connection.query('UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?', [action.amount, action.id], (err) => {
+                if (err) throw err
+                else console.log('Items quantity was successfully updated!');
+                console.log('******************************************************************');
+                askQuestions();
+            });
+        });
+
+}
 function addNewProduct() {}
 function exitApp() {
   connection.end();
 }
 
-//askQuestions();
-viewProductsForSale();
-exitApp();
+
+askQuestions();
