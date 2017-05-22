@@ -122,7 +122,41 @@ function addToInventory() {
         });
 
 }
-function addNewProduct() {}
+
+function addNewProduct() {
+    inquirer.prompt([{
+            type: 'input',
+            name: 'item_name',
+            message: 'Enter item name:',
+        }, {
+            type: "input",
+            name: "dep_id",
+            message: "Enter department ID:"
+        }, {
+            type: "input",
+            name: "price",
+            message: "Enter price:"
+        }, 
+        {
+            type: "input",
+            name: "stock_quantity",
+            message: "Enter stock quantity:"
+        }, 
+        {
+            type: "input",
+            name: "product_sales",
+            message: "Enter product sales:"
+        }
+        ]).then((action) => {
+            //update product quantity based on id
+            connection.query('INSERT INTO products(product_name, department_id, price, stock_quantity,product_sales) VALUES (?,?,?,?,0)', [action.item_name, action.dep_id, action.price, action.stock_quantity, action.product_sales, 0], (err) => {
+                if (err) throw err
+                else console.log('Item was successfully inserted!');
+                console.log('******************************************************************');
+                askQuestions();
+            });
+        });
+}
 function exitApp() {
   connection.end();
 }
